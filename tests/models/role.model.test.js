@@ -31,6 +31,10 @@ const testCases = {
             input: invalidUser,
             output: {status: false, code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid input should throwing error code ER_BAD_FIELD_ERROR'
+        },{
+            input: undefined,
+            output: {status: false, code: 'ER_INVALID_BODY'},
+            description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     findByPk: [
@@ -39,9 +43,13 @@ const testCases = {
             output: {status: true, data: validResult},
             description: 'Success should returning array of objects'
         },{
-            input: 'unknown',
+            input: 99999,
             output: {status: false, code: 'ER_NOT_FOUND'},
             description: 'Empty result should throwing error code ER_NOT_FOUND'
+        },{
+            input: undefined,
+            output: {status: false, code: 'ER_INVALID_BODY'},
+            description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     findAll: [
@@ -49,6 +57,10 @@ const testCases = {
             input: {},
             output: {status: true, data: validResult},
             description: 'Success should returning array of objects'
+        },{
+            input: undefined,
+            output: {status: false, code: 'ER_INVALID_BODY'},
+            description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     findByKeys: [
@@ -60,6 +72,10 @@ const testCases = {
             input: {id:1, name: 'adm', other: 'unknown key'},
             output: {status: false, code: 'ER_NOT_FOUND'},
             description: 'Empty result should throwing error code ER_NOT_FOUND'
+        },{
+            input: undefined,
+            output: {status: false, code: 'ER_INVALID_BODY'},
+            description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     update: [
@@ -71,6 +87,10 @@ const testCases = {
             input: {id: 2, nameX: 'New Role'},
             output: {status: false, code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid input should throwing error code ER_BAD_FIELD_ERROR'
+        },{
+            input: undefined,
+            output: {status: false, code: 'ER_INVALID_BODY'},
+            description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     delete: [
@@ -79,9 +99,13 @@ const testCases = {
             output: {status: true, data: {affectedRows: 1}},
             description: 'Success should affectedRows  = 1'
         },{
-            inputX: 1,
-            output: {status: false, code: 'ER_BAD_FIELD_ERROR'},
-            description: 'Invalid input should throwing error code ER_BAD_FIELD_ERROR'
+            input: 99999,
+            output: {status: false, code: 'ER_NOT_FOUND'},
+            description: 'Empty result should throwing error code ER_NOT_FOUND'
+        },{
+            input: undefined,
+            output: {status: false, code: 'ER_INVALID_BODY'},
+            description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ]
 }

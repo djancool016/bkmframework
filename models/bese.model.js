@@ -14,7 +14,8 @@ class BaseModel {
     }
 
     async findByPk(id) {
-        return this.#runSqlQuery('readByPk', {id})
+        const body = id? {id} : undefined
+        return this.#runSqlQuery('readByPk', body)
     }
 
     async findAll(requestBody) {
@@ -30,7 +31,8 @@ class BaseModel {
     }
 
     async delete(id) {
-        return this.#runSqlQuery('delete', {id})
+        const body = id? {id} : undefined
+        return this.#runSqlQuery('delete', body)
     }
 
     async bulkOperation(operation, requestBody = []) {
@@ -78,11 +80,19 @@ class BaseModel {
 
     async #runSqlQuery(operation, requestBody, otherParams = []) {
         try {
+            if(requestBody == undefined) throw new CustomError('ER_INVALID_BODY', 'Invalid request format')
+
             const { query, param } = this.queryBuilder[operation](requestBody, ...otherParams)
             
             const result = await executeMysqlQuery(query, param)
 
-            if(Array.isArray(result) && result.length == 0) throw new CustomError('ER_NOT_FOUND')
+            if(
+                Array.isArray(result) && result.length == 0 ||
+                result.affectedRows == 0
+            ){
+                throw new CustomError('ER_NOT_FOUND', 'Data not found')
+            }
+        
 
             return resultHandler({ data: result })
 

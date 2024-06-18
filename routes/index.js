@@ -1,11 +1,8 @@
 const router = require('express').Router()
 
-function errRoute(err, req, res, next){
-    res.status(err.status || 500).json({
-        code: err.code || 500,
-        status: false,
-        message: err.message || 'Internal Server Error'
-    })
-}
+router.use('/role', require('./role.routes'))
+router.use('/user', require('./user.routes'))
 
-module.exports = {router, errRoute}
+module.exports = (app) => {
+    app.use('/api', router)
+}

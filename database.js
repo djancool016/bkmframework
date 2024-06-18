@@ -1,5 +1,5 @@
 const mysql = require('mysql2/promise')
-const {db_config, logging} = require('./config')
+const {db_config, loging} = require('./config')
 
 /**
  * Class for handling MYSQL database connection
@@ -21,7 +21,7 @@ class MysqlDatabaseConnection {
         if(!this.db){
             try {
                 this.db = await mysql.createConnection(db_config)
-                if(logging) console.log("Successfully connected to database")
+                if(loging) console.log("Successfully connected to database")
                 return this.db
             } catch (error) {
                 throw error
@@ -36,16 +36,16 @@ class MysqlDatabaseConnection {
         if(this.db){
             try {
                 await this.db.end()
-                if(logging) console.log('Database connection closed.')
+                if(loging) console.log('Database connection closed.')
 
             } catch (error) {
-                if(logging) console.error('Error closing database connection', error)
+                if(loging) console.error('Error closing database connection', error)
                 throw error
             } finally {
                 this.db = null // Set database to null after closing
             }
         } else {
-            if(logging) console.warn('Database connection is already closed or was never initialized')
+            if(loging) console.warn('Database connection is already closed or was never initialized')
         }
     }
 }
@@ -87,7 +87,7 @@ class MysqlPoolConnection {
                 })
                 return this.pool
             } catch (error) {
-                if(logging) console.error("Error creating a connection pool", error)
+                if(loging) console.error("Error creating a connection pool", error)
                 throw error
             }
         }
@@ -99,15 +99,15 @@ class MysqlPoolConnection {
         if (this.pool){
             try {
                 await this.pool.end()
-                if(logging) console.log('Pool connection closed')
+                if(loging) console.log('Pool connection closed')
             } catch (error) {
-                if(logging) console.error('Error closing pool connection', error)
+                if(loging) console.error('Error closing pool connection', error)
                 throw error
             } finally {
                 this.pool = null // Set pool to null after closing
             }
         } else {
-            if(logging) console.warn('Pool connection is already closed or was never initialized')
+            if(loging) console.warn('Pool connection is already closed or was never initialized')
         }
     }
 }
@@ -130,14 +130,14 @@ async function truncateAll(database){
         }))
 
         if(tables.length > 0){
-            if(logging) console.log('All tables have been truncated.')
+            if(loging) console.log('All tables have been truncated.')
             return
         }
-        if(logging)  console.log('0 tables found')
+        if(loging)  console.log('0 tables found')
         return
 
     } catch (error) {
-        if(logging) console.error(error)
+        if(loging) console.error(error)
         throw error
     }
 }

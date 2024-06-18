@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const app = express()
 const PORT = process.env.PORT || 6100
-const {router, errRoute} = require('./routes')
+const setupRoutes = require('./routes')
 
 const {db, truncateAll} = require('./database').init()
 const {migrating, seeding, resetTables} = require('./config')
@@ -18,8 +18,7 @@ db.connect()
     })
     .catch(error => console.error(error))
 
+setupRoutes(app)
 app.use(cookieParser())
 app.use(bodyParser.json())
-app.use('/api', router)
-app.use(errRoute)
 app.listen(PORT, () => console.log(`This server is running on port : http://localhost:${PORT}`))

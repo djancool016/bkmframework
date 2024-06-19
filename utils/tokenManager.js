@@ -18,7 +18,7 @@ class TokenManager {
      */
     static async generateToken(payload, secret, expiresIn = 36000) {
         try {
-            if(!payload || Object.keys(payload).length < 1) throw new Error('empty payload')
+            if(!payload || Object.keys(payload).length == 0) throw new Error('empty payload')
             if(!secret) throw new Error('empty signature')
             return await signAsync(payload, secret, { expiresIn })
 

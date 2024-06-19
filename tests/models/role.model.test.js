@@ -3,12 +3,12 @@ const {db, pool, truncateAll} = require('../../database').init()
 const {seedTables} = require('../../seeders')
 const RoleModel = require('../../models/role.model')
 
-const validUser = {
+const validInput = {
     name: 'Tester Role',
     description: 'This is tested from jest'
 }
 
-const invalidUser = {
+const invalidInput = {
     nameX: 'Tester Role',
     description: 'This is tested from jest'
 }
@@ -24,11 +24,11 @@ const validResult = [
 const testCases = {
     create: [
         {
-            input: validUser,
+            input: validInput,
             output: {status: true, data:{affectedRows: 1}},
             description: 'Success should returning affectedRows = 1'
         },{
-            input: invalidUser,
+            input: invalidInput,
             output: {status: false, code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid input should throwing error code ER_BAD_FIELD_ERROR'
         },{

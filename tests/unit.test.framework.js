@@ -1,3 +1,5 @@
+const logging = require('../config').logging
+
 /**
  * Data-Driven Testing (DDT) for testModule classes
  */
@@ -51,7 +53,7 @@ class UnitTestFramework {
      * @param {*} output - Expected output
      */
     resultBuilder(result, output) {
-        console.log(result)
+        if(logging) console.log(result)
         switch(typeof result) {
             case 'number':
                 // Validate data type and value for numbers
@@ -142,10 +144,6 @@ function hasNestedObject(obj) {
         }
     }
     return false
-}
-
-function isObject(obj){
-    return (Object.keys(obj) > 0)
 }
 
 module.exports = UnitTestFramework

@@ -6,7 +6,7 @@ const logging = require('../config').logging
 class BaseModel {
     constructor(queryBuilder) {
         this.queryBuilder = queryBuilder
-        this.logging = logging || true
+        this.logging = logging
     }
 
     async create(requestBody) {

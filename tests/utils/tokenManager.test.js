@@ -1,12 +1,13 @@
 const TokenManager = require("../../utils/tokenManager")
 const UnitTestFramework = require("../unit.test.framework")
 
-const tempToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRHdpSiIsImlhdCI6MTcxODE4MTI2MCwiZXhwIjoxNzE4MjE3MjYwfQ.z0YMYQMiMlwmWGSli9zFWgWTxmEf3avozdGCZrydo_U'
+const tempToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkR3aUoiLCJpYXQiOjcyNzI3NDU1NDB9.nfk_qeWDYmH4kLbbA9rPJ-E1TjKv6a1AmgQVwI4Lv_A'
 
 const testObj = {
     generateToken: [
         {
             input: [{name: 'DwiJ'},'SECRET_KEY'],
+            output: 'random string',
             description: 'Success should retunring string token'
         },{
             input: [{},'SECRET_KEY'],

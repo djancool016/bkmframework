@@ -76,7 +76,7 @@ class UnitTestFramework {
                     expect(result).toEqual(expect.arrayContaining(
                         output.map(out => expect.objectContaining(out))
                     ))
-                }else if(hasNestedObject(output) || hasNestedObject(result)){
+                }else if(hasNestedObject(output) || hasNestedObject(result) || hasRandomValue(output)){
             
                     // Recursively validate nested objects
                     for (const key in output) {
@@ -138,9 +138,18 @@ class UnitTestFramework {
 }
 
 function hasNestedObject(obj) {
+    for(const key in obj) {
+        if(obj.hasOwnProperty(key) && typeof obj[key] === 'object' && obj[key] !== null) {
+            return true
+        }
+    }
+    return false
+}
+
+function hasRandomValue(obj) {
     for (const key in obj) {
-        if (obj.hasOwnProperty(key) && typeof obj[key] === 'object' && obj[key] !== null) {
-        return true
+        if(obj.hasOwnProperty(key) && (obj[key] === 'random string' || 'random number') && obj[key] !== null){
+            return true
         }
     }
     return false

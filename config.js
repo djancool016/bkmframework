@@ -8,7 +8,7 @@ module.exports = {
         password: process.env.LOCAL_DB_PASSWORD,
         database: 'bkm_db_test'
     },
-    logging: false,
+    logging: true,
     resetTables: true,
     migrating: true,
     seeding: true

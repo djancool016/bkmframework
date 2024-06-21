@@ -44,6 +44,8 @@ function mysqlErrCode(error){
                 return statusLogger({code: 400, message: error.message})
             case 'ER_TRUNCATED_WRONG_VALUE':
                 return statusLogger({code: 400, message: error.message})
+            case 'ER_JWT_MALFORMED':
+                return statusLogger({code: 403, message: 'Invalid Token'})
             default:
                 return statusLogger({code: 500})
         }

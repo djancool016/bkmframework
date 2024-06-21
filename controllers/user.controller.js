@@ -34,6 +34,9 @@ async function rotateToken(req, res, next, cookies = setCookies, secret = proces
 
     } catch (error) {
         if(logging) console.error(error)
+        if(error.message == 'jwt malformed'){
+            error['code'] = 'ER_JWT_MALFORMED'
+        }
         req.result = mysqlErrHandler(error)
         return next()
     }

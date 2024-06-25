@@ -10,12 +10,12 @@ class BaseModel {
     }
 
     async create(requestBody) {
-        if(!requestBody) throw errorCode.ER_INVALID_BODY
+        if(!requestBody || hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('create', requestBody)
     }
 
     async findByPk(id) {
-        if(!id) throw errorCode.ER_INVALID_BODY
+        if(!id || typeof id !== 'number') throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('readByPk', {id})
     }
 
@@ -25,17 +25,17 @@ class BaseModel {
     }
 
     async findByKeys(requestBody, patternMatching = true) {
-        if(!requestBody) throw errorCode.ER_INVALID_BODY
+        if(!requestBody || hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('readByKeys', requestBody, [patternMatching])
     }
 
     async update(requestBody) {
-        if(!requestBody) throw errorCode.ER_INVALID_BODY
+        if(!requestBody || hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('update', requestBody)
     }
 
     async delete(id) {
-        if(!id) throw errorCode.ER_INVALID_BODY
+        if(!id || typeof id !== 'number') throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('delete', {id})
     }
 

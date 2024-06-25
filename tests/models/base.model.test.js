@@ -45,8 +45,6 @@ const invalidUser = {
     nik: '1122334455'
 }
 
-const validResult = [{id: 1, username: 'admin'}]
-
 const testCases = {
     create: [
         {
@@ -61,12 +59,16 @@ const testCases = {
             input: undefined,
             output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
+        },{
+            input: {roleId: 1, userName: '', password: '1234', email: 'email@gmail.com', name: 'DwiJ', phone: '+62123123123', address: 'Indonesia', nik: '1122334455'},
+            output: {code: 'ER_INVALID_BODY'},
+            description: 'Empty username should throwing error code ER_INVALID_BODY'
         }
     ],
     findByPk: [
         {
             input: 1,
-            output: {data: validResult},
+            output: {data: [{id: 1, username: 'admin'}]},
             description: 'Success should returning array of objects'
         },{
             input: 99999,
@@ -76,12 +78,16 @@ const testCases = {
             input: undefined,
             output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
+        },{
+            input: 'invalid_id',
+            output: {code: 'ER_INVALID_BODY'},
+            description: 'Invalid id should throwing error code ER_INVALID_BODY'
         }
     ],
     findAll: [
         {
             input: {},
-            output: {data: validResult},
+            output: {data: [{id: 1, username: 'admin'}]},
             description: 'Success should returning array of objects'
         },{
             input: undefined,
@@ -92,7 +98,7 @@ const testCases = {
     findByKeys: [
         {
             input: {id:1, username: 'adm'},
-            output: {data:validResult},
+            output: {data:[{id: 1, username: 'admin'}]},
             description: 'Success should returning array of objects'
         },{
             input: {id:1, username: 'adm', other: 'unknown key'},
@@ -117,6 +123,10 @@ const testCases = {
             input: undefined,
             output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
+        },{
+            input: {id: 2, name: ''},
+            output: {code: 'ER_INVALID_BODY'},
+            description: 'Empty name should throwing error code ER_INVALID_BODY'
         }
     ],
     delete: [
@@ -132,6 +142,10 @@ const testCases = {
             input: undefined,
             output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
+        },{
+            input: 'invalid_id',
+            output: {code: 'ER_INVALID_BODY'},
+            description: 'Invalid id should throwing error code ER_INVALID_BODY'
         }
     ]
 }

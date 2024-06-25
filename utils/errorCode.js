@@ -1,4 +1,4 @@
-const logging = require('../config').logging
+const { statusLogger } = require("./HttpLogger")
 
 const errorCode = {
     // Database Error Cases
@@ -52,9 +52,6 @@ const errorCode = {
     },
 
     // JWT Error Cases
-    'ER_JWT_FAILED_CREATE_TOKEN': { 
-        httpCode: 401, type: 'JWT_Error', code: 'ER_JWT_FAILED_CREATE_TOKEN', message: 'Failed to create new token' 
-    },
     'ER_JWT_MALFORMED': { 
         httpCode: 401, type: 'JWT_Error', code: 'ER_JWT_MALFORMED', message: 'JWT Malformed' 
     },
@@ -93,14 +90,8 @@ const errorCode = {
     'ER_EMPTY_CREDENTIALS': { 
         httpCode: 400, type: 'Input_Error', code: 'ER_EMPTY_CREDENTIALS', message: 'Empty user credential' 
     },
-    'ER_EMPTY_PASSWORD': { 
-        httpCode: 400, type: 'Input_Error', code: 'ER_EMPTY_PASSWORD', message: 'Empty Password' 
-    },
     'ER_INVALID_PASSWORD': { 
         httpCode: 400, type: 'Input_Error', code: 'ER_INVALID_PASSWORD', message: 'Invalid Password' 
-    },
-    'ER_INVALID_PASSWORD_FORMAT': { 
-        httpCode: 400, type: 'Input_Error', code: 'ER_INVALID_PASSWORD_FORMAT', message: 'Invalid Password Format' 
     },
     'ER_INVALID_USERNAME': { 
         httpCode: 400, type: 'Input_Error', code: 'ER_INVALID_USERNAME', message: 'Invalid Username' 
@@ -121,42 +112,10 @@ const errorCode = {
         httpCode: 400, type: 'Input_Error', code: 'ER_PASSWORD_TOO_WEAK', message: 'Password too weak' 
     },
 
-    // Query Builder Error
-    'ER_INVALID_QUERY_PARAMS': { 
-        httpCode: 500, type: 'Query_Error', code: 'ER_INVALID_QUERY_PARAMS', message: 'Invalid query builder params' 
-    },
-
-    // Password Manager Error
-    'ER_INVALID_HASH_FORMAT': {
-        httpCode: 500, type: 'Password_Manager_Error', code: 'ER_HASHING_PASSWORD', message: 'Password Hashing Error' 
-    },
-    'ER_EMPTY_HASHED_PASSWORD': {
-        httpCode: 500, type: 'Password_Manager_Error', code: 'ER_EMPTY_HASHED_PASSWORD', message: 'Empty Hashed Password' 
-    },
-    'ER_COMPARE_PASSWORD': {
-        httpCode: 500, type: 'Password_Manager_Error', code: 'ER_COMPARE_PASSWORD', message: 'Error compare password with hash' 
-    },
-
     // unknown error
     'INTERNAL_SERVER_ERROR': { 
         httpCode: 500, type: 'Unknown_Error', code: 'INTERNAL_SERVER_ERROR', message: 'Internal server error' 
     }
 }
 
-class CustomError extends Error {
-    constructor(error){
-        super(error.message)
-        for(const key in error){
-            this[key] = error[key] 
-        }
-        this.name = this.constructor.name
-    }
-}
 
-function errorHandler(error){
-    if(logging) console.error(error)
-    const errorDetail = errorCode[error.code] || errorCode.INTERNAL_SERVER_ERROR
-    throw new CustomError(errorDetail)
-}
-
-module.exports = {errorCode, errorHandler}

@@ -34,6 +34,11 @@ const testObj = {
             input: {name: 'DwiJ', username:'admin'},
             output: '',
             description: 'Success should return object contains CREATE query and params'
+        },
+        {
+            input: {name: '', username: ''},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Empty input should throw error'
         }
     ],
     readByPk: [
@@ -41,6 +46,16 @@ const testObj = {
             input: {id: 1},
             output: '',
             description: 'Success should return object contains SELECT query and params'
+        },
+        {
+            input: {id: null},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Null id should throw error'
+        },
+        {
+            input: {id: 'invalid'},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Invalid id type should throw error'
         }
     ],
     readAll: [
@@ -48,6 +63,11 @@ const testObj = {
             input: {},
             output: '',
             description: 'Success should return object contains SELECT query and params'
+        },
+        {
+            input: {page: 1, limit: 10},
+            output: '',
+            description: 'Success should return paginated SELECT query and params'
         }
     ],
     readByKeys: [
@@ -55,6 +75,16 @@ const testObj = {
             input: {name: 'DwiJ', roleId: 1, role: 'admin', status: 'active'},
             output: '',
             description: 'Success should return object contains SELECT query and params'
+        },
+        {
+            input: {name: 'DwiJ'},
+            output: '',
+            description: 'Success should return object contains SELECT query and params with partial keys'
+        },
+        {
+            input: {name: ''},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Empty key value should throw error'
         }
     ],
     update: [
@@ -62,6 +92,16 @@ const testObj = {
             input: {id: 1, name: 'JDwyne'},
             output: '',
             description: 'Success should return object contains UPDATE query and params'
+        },
+        {
+            input: {id: 1},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Missing fields to update should throw error'
+        },
+        {
+            input: {id: null, name: 'JDwyne'},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Null id should throw error'
         }
     ],
     delete: [
@@ -69,6 +109,16 @@ const testObj = {
             input: {id: 1},
             output: '',
             description: 'Success should return object contains DELETE query and params'
+        },
+        {
+            input: {id: null},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Null id should throw error'
+        },
+        {
+            input: {id: 'invalid'},
+            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            description: 'Invalid id type should throw error'
         }
     ]
 }

@@ -1,45 +1,62 @@
 const TokenManager = require("../../utils/tokenManager")
 const UnitTestFramework = require("../unit.test.framework")
 
-const tempToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkR3aUoiLCJpYXQiOjcyNzI3NDU1NDB9.nfk_qeWDYmH4kLbbA9rPJ-E1TjKv6a1AmgQVwI4Lv_A'
+const activeToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWQiOjEsIm5hbWUiOiJEd2lKIiwiaWF0Ijo3MjcyNzQ1NTQwfQ.TyOgejLi1BeNzhIO1oojROgv37HMTL6K0ZGCvDWweoI'
+const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWQiOjEsIm5hbWUiOiJEd2lKIiwiaWF0IjoxNjU2MTI5MTgxfQ.YRiKrJ1Zmc6GF_iKNr9G_rj_lFja3c-UEcGW903OJ3k'
 
 const testObj = {
     generateToken: [
         {
             input: [{name: 'DwiJ'},'SECRET_KEY'],
             output: 'random string',
-            description: 'Success should retunring string token'
+            description: 'Success should returning string token'
         },{
             input: [{},'SECRET_KEY'],
-            output: {message: 'empty payload'},
+            output: {code: 'ER_JWT_EMPTY_PAYLOAD'},
             description: 'Empty payload should throw error'
         },{
             input: [{name: 'DwiJ'},''],
-            output: {message: 'empty signature'},
+            output: {code: 'ER_JWT_EMPTY_SIGNATURE'},
             description: 'Empty secret token should throw error'
+        },{
+            input: [{name: 'DwiJ'},'SECRET_KEY', 0],
+            output: {code: 'ER_JWT_EXPIRED'},
+            description: 'Expired token should throw error'
+        },{
+            input: [{name: 'DwiJ'},'SECRET_KEY', -1],
+            output: {code: 'ER_JWT_EXPIRED'},
+            description: 'Negative expiration time should throw error'
         }
     ],
     verifyToken: [
         {
-            input: [tempToken,'SECRET_KEY'],
+            input: [activeToken,'SECRET_KEY'],
             output: {name: 'DwiJ'},
             description: 'Success should returning payload data'
         },{
             input: ['invalid token', 'SECRET_KEY'],
-            output: {message: 'jwt malformed'},
+            output: {code: 'ER_JWT_MALFORMED'},
             description: 'Invalid token should throw error'
         },{
             input: ['', 'SECRET_KEY'],
-            output: {message: 'empty token'},
+            output: {code: 'ER_JWT_NOT_FOUND'},
             description: 'Empty token should throw error'
         },{
-            input: [tempToken,'INVALID_SECRET_KEY'],
-            output: {message: 'invalid signature'},
+            input: [activeToken,'INVALID_SECRET_KEY'],
+            output: {code: 'ER_JWT_SIGNATURE_MISMATCH'},
             description: 'Invalid payload should throw error'
         },{
-            input: [tempToken,''],
-            output: {message: 'empty signature'},
+            input: [activeToken,''],
+            output: {code: 'ER_JWT_EMPTY_SIGNATURE'},
             description: 'Empty payload should throw error'
+        },{
+            input: [expiredToken, 'SECRET_KEY'],
+            output: {code: 'ER_JWT_EXPIRED'},
+            description: 'Expired token should throw error'
+        },{
+            input: [activeToken, 'SECRET_KEY', {ignoreExpiration: true}],
+            output: {name: 'DwiJ'},
+            description: 'Success should return payload data even if token is expired when ignoreExpiration is true'
         }
     ]
 }

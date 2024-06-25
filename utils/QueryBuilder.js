@@ -1,4 +1,5 @@
 const logging = require('../config').logging
+const {errorCode, errorHandler} = require('../utils/CustomError')
 
 class QueryBuilder {
     constructor({table = '', includes = [], alias = [], association = []}){
@@ -15,6 +16,8 @@ class QueryBuilder {
     }
     create(requestBody){
         try {
+            if(hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_QUERY_PARAMS
+
             // extract keys and values from object data
             const keys = Object.keys(requestBody)
 
@@ -26,19 +29,19 @@ class QueryBuilder {
                 param: paramsBuilder(requestBody, [], false, false)
             }
         } catch (error) {
-            if(logging) console.error(error)
-            throw queryErrorHandler(error)
+            throw errorHandler(error)
         }
     }
     readByPk(requestBody){
         try {
+            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_INVALID_QUERY_PARAMS
+
             return {
                 query: `SELECT ${this.select} FROM ${this.table} ${this.join} WHERE ${this.table}.id = ?`,
                 param: [requestBody.id]
             }
         } catch (error) {
-            if(logging) console.error(error)
-            throw queryErrorHandler(error)
+            throw errorHandler(error)
         }
     }
     readAll(requestBody){
@@ -49,12 +52,13 @@ class QueryBuilder {
                 param: []
             }
         } catch (error) {
-            if(logging) console.error(error)
-            throw queryErrorHandler(error)
+            throw errorHandler(error)
         }
     }
     readByKeys(requestBody, patternMatching = true){
         try {
+            if(hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_QUERY_PARAMS
+
             const where = this.where(requestBody, patternMatching)
             const paging = this.paging(requestBody)
             const binary = !patternMatching ? 'BINARY' : ''
@@ -65,13 +69,16 @@ class QueryBuilder {
             }
 
         } catch (error) {
-            if(logging) console.error(error)
-            throw queryErrorHandler(error)
+            throw errorHandler(error)
         }
     }
     update(requestBody){
         try {
+            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_INVALID_QUERY_PARAMS
+
             const {id, ...data} = requestBody
+
+            if(hasEmptyValue(data)) throw errorCode.ER_INVALID_QUERY_PARAMS
 
             // extract keys and values from object data
             const keys = Object.keys(data)
@@ -87,19 +94,19 @@ class QueryBuilder {
             }
 
         } catch (error) {
-            if(logging) console.error(error)
-            throw queryErrorHandler(error)
+            throw errorHandler(error)
         }
     }
     delete(requestBody){
         try {
+            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_INVALID_QUERY_PARAMS
+            
             return {
                 query: `DELETE FROM ${this.table} WHERE ${this.table}.id = ?`,
                 param: [requestBody.id]
             }
         } catch (error) {
-            if(logging) console.error(error)
-            throw queryErrorHandler(error)
+            throw errorHandler(error)
         }
     }
 }
@@ -120,13 +127,6 @@ function paramsBuilder(requestBody, excludedKeys = [], allowedArrayValue = false
         })
 
     return params
-}
-
-function queryErrorHandler(error){
-    const err = new Error('QueryBuilder Error')
-    err.code = error.code || 'ER_QUERY_BUILDER'
-    err.message = error.message || 'Unknown Error'
-    return err
 }
 
 function selectBuilder({table, includes, alias, association = []}){
@@ -220,5 +220,11 @@ function pagingBuilder(requestBody){
     
     return `LIMIT ${limit} OFFSET ${offset}`
 }
+
+function hasEmptyValue(obj) {
+    if(Object.keys(obj).length < 1) return true
+    return Object.values(obj).some(value => value === null || value === undefined || value === '')
+}
+
 
 module.exports = QueryBuilder

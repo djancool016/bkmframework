@@ -45,7 +45,19 @@ function mysqlErrCode(error){
             case 'ER_TRUNCATED_WRONG_VALUE':
                 return statusLogger({code: 400, message: error.message})
             case 'ER_JWT_MALFORMED':
-                return statusLogger({code: 403, message: 'Invalid Token'})
+                return statusLogger({code: 403, message: 'JWT Malformed'})
+            case 'ER_JWT_NOT_FOUND':
+                return statusLogger({code: 403, message: 'JWT Not Found'})
+            case 'ER_TWT_EMPTY_PAYLOAD':
+                return statusLogger({code: 403, message: 'JWT Empty Payload'})
+            case 'ER_JWT_EXPIRED':
+                return statusLogger({code: 403, message: 'JWT Expired'})
+            case 'ER_JWT_EMPTY_SIGNATURE':
+                return statusLogger({code: 403, message: 'JWT Signature Empty'})
+            case 'ER_JWT_PAYLOAD_INVALID':
+                return statusLogger({code: 403, message: 'JWT Payload Invalid'})
+            case 'ER_JWT_INVALID':
+                return statusLogger({code: 403, message: 'Invalid JWT'})
             default:
                 return statusLogger({code: 500})
         }

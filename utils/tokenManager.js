@@ -1,6 +1,6 @@
 require('dotenv').config()
 const util = require('util')
-const logging = require('../config').logging
+const {errorCode, errorHandler} = require('../utils/CustomError')
 
 const jwt = require('jsonwebtoken')
 const signAsync = util.promisify(jwt.sign)
@@ -18,13 +18,13 @@ class TokenManager {
      */
     static async generateToken(payload, secret, expiresIn = 36000) {
         try {
-            if(!payload || Object.keys(payload).length == 0) throw new Error('empty payload')
-            if(!secret) throw new Error('empty signature')
+            if(!payload || Object.keys(payload).length == 0) throw errorCode.ER_JWT_EMPTY_PAYLOAD
+            if(!secret) throw errorCode.ER_JWT_EMPTY_SIGNATURE
+            if(expiresIn <= 0) throw errorCode.ER_JWT_EXPIRED
             return await signAsync(payload, secret, { expiresIn })
 
         } catch (error) {
-            if(logging) console.error(error)
-            throw error
+            throw errorHandler(error)
         }
     }
     /**
@@ -34,36 +34,55 @@ class TokenManager {
      */
     static async verifyToken(token, secret) {
         try {
-            if(!token) throw new Error('empty token')
-            if(!secret) throw new Error('empty signature')
-            return await verifyAsync(token, secret)
+            if(!token) throw errorCode.ER_JWT_NOT_FOUND
+            if(!secret) throw errorCode.ER_JWT_EMPTY_SIGNATURE
+            if (!token.startsWith('eyJ')) {
+                throw errorCode.ER_JWT_MALFORMED
+            }
+                
+            const payload = await verifyAsync(token, secret)
+
+            if(payload) {
+                // Check if 'iat' (issued at) is present and valid
+                if (!payload.iat || Date.now() >= payload.iat * 1000) {
+                    throw errorCode.ER_JWT_EXPIRED
+                }
+                return payload
+            }
 
         } catch (error) {
-            if(logging) console.error(error)
-            throw error
+            if(error.message == 'invalid signature'){
+                throw errorHandler(errorCode.ER_JWT_SIGNATURE_MISMATCH)
+            }
+            throw errorHandler(error)
         }
     }
     /**
      * @param {Object} payload contains client data { id, username }
+     * @param {String} secret token secret (default = process.env.REFRESH_TOKEN_SECRET)
      * @param {Number} refreshTokenExpiration refresh token expiration in second (default = 86400)
      * @param {Number} accessTokenExpiration access token expiration in second (default = 3600)
      * @returns refreshToken & accessToken
      */
-    static async authenticatedUser({id, username}, refreshTokenExpiration = 86400, accessTokenExpiration = 3600) {
+    static async authenticatedUser(
+        payload, 
+        secret = process.env.REFRESH_TOKEN_SECRET,
+        refreshTokenExpiration = 86400, 
+        accessTokenExpiration = 3600
+    ) {
         try {
             const refreshToken = await TokenManager.generateToken(
-                {id}, process.env.REFRESH_TOKEN_SECRET, refreshTokenExpiration
+                payload, secret, refreshTokenExpiration
             )
                 
             const accessToken = await TokenManager.generateToken(
-                {id, username}, process.env.ACCESS_TOKEN_SECRET, accessTokenExpiration
+                payload, secret, accessTokenExpiration
             )
-            
+            if(!refreshToken || !accessToken) throw errorCode.ER_JWT_FAILED_CREATE_TOKEN
             return {refreshToken, accessToken}
 
         } catch (error) {
-            if(logging) console.error(error)
-            throw error
+            errorHandler(error)
         }
     }
     
@@ -73,22 +92,16 @@ class TokenManager {
      * @param {Number} accessTokenExpiration access token expiration in second (default = 3600)
      * @returns new accessToken & refreshToken
      */
-    static async tokenRotation(accessToken, refreshTokenExpiration = 86400, accessTokenExpiration = 3600) {
+    static async tokenRotation(refreshToken, refreshTokenExpiration = 86400, accessTokenExpiration = 3600) {
         try {
-
-            const {id, username} = await TokenManager.verifyToken(
-                accessToken, process.env.ACCESS_TOKEN_SECRET
-            )
-
-            if(!id || !username) throw new Error('Invalid access token')
+            const payload = TokenManager.verifyToken(refreshToken, process.env.REFRESH_TOKEN_SECRET)
 
             return await TokenManager.authenticatedUser(
-                {id, username}, refreshTokenExpiration, accessTokenExpiration
+                payload, refreshTokenExpiration, accessTokenExpiration
             )
 
         } catch (error) {
-            if(logging) console.error(error)
-            throw new Error('Token rotation error: ' + error)
+            throw errorHandler(error)
         }
     }
 }

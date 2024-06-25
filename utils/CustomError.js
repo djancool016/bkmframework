@@ -8,6 +8,9 @@ const errorCode = {
     'ER_BAD_DB_ERROR': { 
         httpCode: 404, type: 'DB_Error', code: 'ER_BAD_DB_ERROR', message: 'Database not found' 
     },
+    'ER_PARTIAL_BULK_ENTRY': { 
+        httpCode: 207, type: 'DB_Error', code: 'ER_PARTIAL_BULK_ENTRY', message: 'Part of operations is terminated' 
+    },
     'ER_NOT_FOUND': { 
         httpCode: 404, type: 'DB_Error', code: 'ER_NOT_FOUND', message: 'Resource not found' 
     },
@@ -135,6 +138,14 @@ const errorCode = {
     },
     'ER_COMPARE_PASSWORD': {
         httpCode: 500, type: 'Password_Manager_Error', code: 'ER_COMPARE_PASSWORD', message: 'Error compare password with hash' 
+    },
+
+    // Internal Model Error
+    'ER_INVALID_METHOD': {
+        httpCode: 500, type: 'Model_Error', code: 'ER_INVALID_METHOD', message: 'Invalid method is called' 
+    },
+    'ER_QUERY_ERROR': {
+        httpCode: 500, type: 'Model_Error', code: 'ER_QUERY_PARAM', message: 'Query id not defined' 
     },
 
     // unknown error

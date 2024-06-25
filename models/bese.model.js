@@ -1,6 +1,6 @@
 const { pool } = require('../database').init()
 const poolConnection = pool.createPool()
-const CustomError = require('../utils/CustomError')
+const {errorCode, errorHandler} = require('../utils/CustomError')
 const logging = require('../config').logging 
 
 class BaseModel {
@@ -10,29 +10,33 @@ class BaseModel {
     }
 
     async create(requestBody) {
+        if(!requestBody) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('create', requestBody)
     }
 
     async findByPk(id) {
-        const body = id? {id} : undefined
-        return this.#runSqlQuery('readByPk', body)
+        if(!id) throw errorCode.ER_INVALID_BODY
+        return this.#runSqlQuery('readByPk', {id})
     }
 
     async findAll(requestBody) {
+        if(!requestBody) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('readAll', requestBody)
     }
 
     async findByKeys(requestBody, patternMatching = true) {
+        if(!requestBody) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('readByKeys', requestBody, [patternMatching])
     }
 
     async update(requestBody) {
+        if(!requestBody) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('update', requestBody)
     }
 
     async delete(id) {
-        const body = id? {id} : undefined
-        return this.#runSqlQuery('delete', body)
+        if(!id) throw errorCode.ER_INVALID_BODY
+        return this.#runSqlQuery('delete', {id})
     }
 
     async bulkOperation(operation, requestBody = []) {
@@ -41,7 +45,7 @@ class BaseModel {
 
         try {
             if (!Array.isArray(requestBody)) {
-                throw new CustomError('ER_BAD_REQUEST', 'Invalid request body: expected an array')
+                throw errorCode.ER_INVALID_BODY
             }
 
             await Promise.all(requestBody.map(async (body) => {
@@ -62,11 +66,12 @@ class BaseModel {
                 return { status: true, data: { affectedRows: successCount } }
             }
 
-            throw new CustomError('ER_PARTIAL_BULK_ENTRY', `Part of ${operation} operation is terminated`)
+            throw errorCode.ER_PARTIAL_BULK_ENTRY
 
         } catch (error) {
             const err = {
                 status: false,
+                httpCode: error.httpCode || 207,
                 code: error.code || 'ER_PARTIAL_BULK_ENTRY',
                 message: error.message,
                 totalError: errorList.length,
@@ -80,33 +85,23 @@ class BaseModel {
 
     async #runSqlQuery(operation, requestBody, otherParams = []) {
         try {
-            if(requestBody == undefined) throw new CustomError('ER_INVALID_BODY', 'Invalid request format')
+            if(!operation) throw errorCode.ER_INVALID_METHOD
 
             const { query, param } = this.queryBuilder[operation](requestBody, ...otherParams)
-            
+            if(!query) throw errorCode.ER_QUERY_ERROR
+
             const result = await executeMysqlQuery(query, param)
 
-            if(
-                Array.isArray(result) && result.length == 0 ||
-                result.affectedRows == 0
-            ){
-                throw new CustomError('ER_NOT_FOUND', 'Data not found')
+            if(Array.isArray(result) && result.length == 0 ||result.affectedRows == 0){
+                throw errorCode.ER_NOT_FOUND
             }
-        
-
             return resultHandler({ data: result })
 
         } catch (error) {
-            const err = {
-                code: error.code,
-                message: error.message,
+            if(errorCode[error.code]){
+                throw errorHandler(errorCode[error.code])
             }
-            if(error.message?.includes('Bind parameters must not contain undefined')){
-                err.code = 'ER_BAD_FIELD_ERROR'
-                err.message = 'Invalid Identifier'
-            }
-            if (this.logging) console.error(`BaseModel.${operation} error`, err)
-            return resultHandler(err)
+            throw errorHandler(error)
         }
     }
 }
@@ -122,5 +117,11 @@ async function executeMysqlQuery(query, params = []) {
     const [result] = await poolConnection.execute(query, params)
     return result
 }
+
+function hasEmptyValue(obj) {
+    if(Object.keys(obj).length < 1) return true
+    return Object.values(obj).some(value => value === null || value === undefined || value === '')
+}
+
 
 module.exports = BaseModel

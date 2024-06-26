@@ -25,92 +25,90 @@ const invalidUser = {
     nik: '1122334455'
 }
 
-const validResult = [{id: 1, username: 'admin'}]
-
 const testCases = {
     create: [
         {
             input: validUser,
-            output: {status: true, data:{affectedRows: 1}},
+            output: {data:{affectedRows: 1}},
             description: 'Success should returning affectedRows = 1'
         },{
             input: invalidUser,
-            output: {status: false, code: 'ER_BAD_FIELD_ERROR'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid input should throwing error code ER_BAD_FIELD_ERROR'
         },{
             input: undefined,
-            output: {status: false, code: 'ER_INVALID_BODY'},
+            output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     findByPk: [
         {
             input: 1,
-            output: {status: true, data: validResult},
+            output: {data: [{id: 1, username: 'admin'}]},
             description: 'Success should returning array of objects'
         },{
             input: 999999,
-            output: {status: false, code: 'ER_NOT_FOUND'},
+            output: {code: 'ER_NOT_FOUND'},
             description: 'Empty result should throwing error code ER_NOT_FOUND'
         },{
             input: undefined,
-            output: {status: false, code: 'ER_INVALID_BODY'},
+            output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     findAll: [
         {
             input: {},
-            output: {status: true, data: validResult},
+            output: {data: [{id: 1, username: 'admin'}]},
             description: 'Success should returning array of objects'
         },{
             input: undefined,
-            output: {status: false, code: 'ER_INVALID_BODY'},
+            output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     findByKeys: [
         {
             input: {id:1, username: 'adm'},
-            output: {status: true, data:validResult},
+            output: {data:[{id: 1, username: 'admin'}]},
             description: 'Success should returning array of objects'
         },{
             input: {id:1, username: 'adm', other: 'unknown key'},
-            output: {status: false, code: 'ER_NOT_FOUND'},
+            output: {code: 'ER_NOT_FOUND'},
             description: 'Empty result should throwing error code ER_NOT_FOUND'
         },{
             input: undefined,
-            output: {status: false, code: 'ER_INVALID_BODY'},
+            output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     update: [
         {
             input: {id: 2, name: 'JuliantDwyne'},
-            output: {status: true, data: {affectedRows: 1}},
+            output: {data: {affectedRows: 1}},
             description: 'Success should affectedRows  = 1'
         },{
             input: {id: 2, nameX: 'JuliantDwyne'},
-            output: {status: false, code: 'ER_BAD_FIELD_ERROR'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid input should throwing error code ER_BAD_FIELD_ERROR'
         },{
             input: undefined,
-            output: {status: false, code: 'ER_INVALID_BODY'},
+            output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ],
     delete: [
         {
             input: 2,
-            output: {status: true, data: {affectedRows: 1}},
+            output: {data: {affectedRows: 1}},
             description: 'Success should affectedRows  = 1'
         },{
             input: 9999,
-            output: {status: false, code: 'ER_NOT_FOUND'},
+            output: {code: 'ER_NOT_FOUND'},
             description: 'Empty result should throwing error code ER_NOT_FOUND'
         },{
             input: undefined,
-            output: {status: false, code: 'ER_INVALID_BODY'},
+            output: {code: 'ER_INVALID_BODY'},
             description: 'Invalid input should throwing error code ER_INVALID_BODY'
         }
     ]

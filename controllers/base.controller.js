@@ -1,16 +1,16 @@
 const {statusLogger, dataLogger} = require('../utils/HttpLogger')
-const mysqlErrHandler = require('../utils/MysqlErrorCode')
+const {errorCode, errorHandler} = require('../utils/CustomError')
 const CustomError = require('../utils/CustomError')
 const logging = require('../config').logging
 
 async function create(req, res, next, model){
     try {
-        if(req.result?.status === false) return next()
+        if(req.result?.httpCode > 299) return next()
 
         const result = await model.create(req.body)
 
         if(result.status){
-            req.result = dataLogger({code: 201, data: result.data})
+            req.result = dataLogger({httpCode: 201, data: result.data})
         }else {
             throw result
         }
@@ -19,7 +19,7 @@ async function create(req, res, next, model){
         
     } catch (error) {
         if(logging) console.error(error)
-        req.result = mysqlErrHandler(error)
+        req.result = errorHandler(error)
         return next()
     }
 }
@@ -41,11 +41,11 @@ async function read(req, res, next, model){
                 result = await model.findAll(req.body)
                 break
             default:
-                throw new CustomError('ER_INVALID_BODY')
+                throw errorCode.ER_INVALID_BODY
         }
 
         if(result.status){
-            req.result = dataLogger({data: result.data})
+            req.result = dataLogger({httpCode: 200, data: result.data})
         }else{
             throw result
         }
@@ -53,18 +53,18 @@ async function read(req, res, next, model){
 
     } catch (error) {
         if(logging) console.error(error)
-        req.result = mysqlErrHandler(error)
+        req.result = errorHandler(error)
         return next()
     }
 }
 async function update(req, res, next, model){
     try {
-        if(req.result?.status === false) return next()
+        if(req.result?.httpCode > 299) return next()
 
         const result = await model.update(req.body) 
 
         if(result.data){
-            req.result = dataLogger({data: result.data})
+            req.result = dataLogger({httpCode: 200, data: result.data})
         }else{
             throw result
         }
@@ -72,13 +72,13 @@ async function update(req, res, next, model){
 
     } catch (error) {
         if(logging) console.error(error)
-        req.result = mysqlErrHandler(error)
+        req.result = errorHandler(error)
         return next()
     }
 }
 async function destroy(req, res, next, model){
     try {
-        if(req.result?.status === false) return next()
+        if(req.result?.httpCode > 299) return next()
     
         let id
 
@@ -93,12 +93,12 @@ async function destroy(req, res, next, model){
                 id = req.body.id
                 break
             default:
-                throw new CustomError('ER_INVALID_BODY')
+                throw errorCode.ER_INVALID_BODY
         }
         const result = await model.delete(id)
 
         if(result.data){
-            req.result = dataLogger({data: result.data})
+            req.result = dataLogger({httpCode: 200, data: result.data})
         }else{
             throw result
         }
@@ -109,7 +109,7 @@ async function destroy(req, res, next, model){
             error.message = 'Id is used as foreign key'
         }
         if(logging) console.error(error)
-        req.result = mysqlErrHandler(error)
+        req.result = errorHandler(error)
         return next()
     }
 }
@@ -120,10 +120,10 @@ async function destroy(req, res, next, model){
  */
 function sendResponse(req, res) {
     if(req.result){
-        res.status(req.result.code).json(req.result)
+        res.status(req.result.httpCode).json(req.result)
     }else {
         res.status(500).json(statusLogger({
-            code: 500, 
+            httpCode: 500, 
             message:'BaseControllerBadResponse'
         }))
     }

@@ -17,44 +17,44 @@ const HttpStatus = {
 /**
  * Logs HTTP status code and message.
  * @param {object} param - Parameters.
- * @param {number} param.code - HTTP status code.
+ * @param {number} param.httpCode - HTTP status code.
  * @param {string} [param.message=''] - Custom log message. If empty, auto-fills with HTTP status code description.
- * @returns {object} - Log object containing code, status, and message.
+ * @returns {object} - Log object containing httpCode, status, and message.
  */
-function statusLogger({code, message = ''}){
+function statusLogger({httpCode, message = ''}){
 
     try {
 
-        if(!code) throw new Error('EmptyHttpCode')
-        if(invalidStatusCode(code)) throw new Error('InvalidHttpCode')
+        if(!httpCode) throw new Error('EmptyHttpCode')
+        if(invalidStatusCode(httpCode)) throw new Error('InvalidHttpCode')
 
         let status
         let defaultMessage
 
-        switch (code) {
+        switch (httpCode) {
             case HttpStatus.OK:
             case HttpStatus.NO_CONTENT:
             case HttpStatus.PARTIAL_CONTENT:
             case HttpStatus.CREATED:
                 status = true
-                defaultMessage = message || getHttpStatusByValue(code)
+                defaultMessage = message || getHttpStatusByValue(httpCode)
                 break
             default:
                 status = false
-                defaultMessage = message || getHttpStatusByValue(code) || 'Invalid Status Code'
+                defaultMessage = message || getHttpStatusByValue(httpCode) || 'Invalid Status Code'
                 break
         }
-        return { code, status, message: defaultMessage }
+        return { httpCode, status, message: defaultMessage }
 
     } catch (error) {
         
         switch(error.message){
             case 'EmptyHttpCode': 
-                return statusLogger({code: 500, message: 'Empty HTTP Code'})
+                return statusLogger({httpCode: 500, message: 'Empty HTTP Code'})
             case 'InvalidHttpCode':
-                return statusLogger({code: 500, message: 'Invalid HTTP Code'})
+                return statusLogger({httpCode: 500, message: 'Invalid HTTP Code'})
             default:
-                return statusLogger({code: 500, message: error.message})
+                return statusLogger({httpCode: 500, message: error.message})
         }       
     }
 }
@@ -63,22 +63,23 @@ function statusLogger({code, message = ''}){
  * @param {object} param - Parameters.
  * @param {object} param.data - Data to log.
  * @param {string} [param.message=''] - Custom log message.
- * @returns {object} - Log object containing code, data, status, and message.
+ * @param {number} [param.httpCode=200] - HTTP status code.
+ * @returns {object} - Log object containing httpCode, data, status, and message.
  */
-function dataLogger({data, message = '', code = 200}){
+function dataLogger({data, message = '', httpCode = 200}){
 
     try {
 
         if(!data || Object.keys(data).length < 1) throw new Error('EmptyData')
 
-        return {code, data, status: true, message: message || 'OK'}
+        return {httpCode, data, status: true, message: message || 'OK'}
 
     } catch (error) { 
         switch(error.message){
             case 'EmptyData': 
-                return statusLogger({code: 404, message: 'Empty Payload Data'})
+                return statusLogger({httpCode: 404, message: 'Empty Payload Data'})
             default:
-                return statusLogger({code: 500, message: error.message})
+                return statusLogger({httpCode: 500, message: error.message})
         }      
     }
 }

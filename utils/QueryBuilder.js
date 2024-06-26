@@ -16,7 +16,7 @@ class QueryBuilder {
     }
     create(requestBody){
         try {
-            if(hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_QUERY_PARAMS
+            if(hasEmptyValue(requestBody)) throw errorCode.ER_BAD_FIELD_ERROR
 
             // extract keys and values from object data
             const keys = Object.keys(requestBody)
@@ -34,7 +34,7 @@ class QueryBuilder {
     }
     readByPk(requestBody){
         try {
-            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_INVALID_QUERY_PARAMS
+            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_BAD_FIELD_ERROR
 
             return {
                 query: `SELECT ${this.select} FROM ${this.table} ${this.join} WHERE ${this.table}.id = ?`,
@@ -57,7 +57,7 @@ class QueryBuilder {
     }
     readByKeys(requestBody, patternMatching = true){
         try {
-            if(hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_QUERY_PARAMS
+            if(hasEmptyValue(requestBody)) throw errorCode.ER_BAD_FIELD_ERROR
 
             const where = this.where(requestBody, patternMatching)
             const paging = this.paging(requestBody)
@@ -74,11 +74,11 @@ class QueryBuilder {
     }
     update(requestBody){
         try {
-            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_INVALID_QUERY_PARAMS
+            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_BAD_FIELD_ERROR
 
             const {id, ...data} = requestBody
 
-            if(hasEmptyValue(data)) throw errorCode.ER_INVALID_QUERY_PARAMS
+            if(hasEmptyValue(data)) throw errorCode.ER_BAD_FIELD_ERROR
 
             // extract keys and values from object data
             const keys = Object.keys(data)
@@ -99,7 +99,7 @@ class QueryBuilder {
     }
     delete(requestBody){
         try {
-            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_INVALID_QUERY_PARAMS
+            if(hasEmptyValue(requestBody) || typeof requestBody.id !== 'number') throw errorCode.ER_BAD_FIELD_ERROR
             
             return {
                 query: `DELETE FROM ${this.table} WHERE ${this.table}.id = ?`,

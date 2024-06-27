@@ -37,7 +37,7 @@ const testObj = {
         },
         {
             input: {name: '', username: ''},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Empty input should throw error'
         }
     ],
@@ -49,12 +49,12 @@ const testObj = {
         },
         {
             input: {id: null},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Null id should throw error'
         },
         {
             input: {id: 'invalid'},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid id type should throw error'
         }
     ],
@@ -83,7 +83,7 @@ const testObj = {
         },
         {
             input: {name: ''},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Empty key value should throw error'
         }
     ],
@@ -95,12 +95,12 @@ const testObj = {
         },
         {
             input: {id: 1},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Missing fields to update should throw error'
         },
         {
             input: {id: null, name: 'JDwyne'},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Null id should throw error'
         }
     ],
@@ -112,12 +112,12 @@ const testObj = {
         },
         {
             input: {id: null},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Null id should throw error'
         },
         {
             input: {id: 'invalid'},
-            output: {code: 'ER_INVALID_QUERY_PARAMS'},
+            output: {code: 'ER_BAD_FIELD_ERROR'},
             description: 'Invalid id type should throw error'
         }
     ]

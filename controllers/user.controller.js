@@ -78,15 +78,34 @@ async function authorizeUser(req, res, next, cookies = setCookies, secret = toke
  * Function for handling user login using 
  * authorizeUser (JWT Token) or authenticateUser (user credential)
  */
-async function login(){
+async function login(req, res, next, cookies = setCookies, secret = tokenSecret) {
+    try {
+        // check if token exist
+        const refreshToken = req?.cookies?.refreshToken
+        const accessToken = req?.cookies?.accessToken
 
+        if (accessToken && refreshToken) {
+            // use authorizeUser if tokens exist
+            return await authorizeUser(req, res, next, cookies, secret)
+        } else if (req.body?.username || req.body?.password) {
+            // use authenticateUser if tokens do not exist
+            return await authenticateUser(req, res, next, cookies, secret)
+        } else {
+            // throw forbidden if no token and no credentials
+            throw errorCode.ER_ACCESS_DENIED_ERROR
+        }
+    } catch (error) {
+        req.result = errorHandler(error)
+        return next()
+    }
 }
 /**
  * Function to authenticate user using username and password
  */
 async function authenticateUser(req, res, next, cookies = setCookies, secret = tokenSecret) {
     try {
-        const { username, password } = req.body;
+        if(!req.body) throw errorCode.ER_INVALID_BODY
+        const { username, password } = req.body
 
         // Validate username and password
         if (!username || !password) {
@@ -187,6 +206,6 @@ async function getUserData(payload) {
     throw errorCode.ER_JWT_PAYLOAD_INVALID
 }
 module.exports = {
-    rotateToken, authorizeUser, authenticateUser
+    rotateToken, authorizeUser, authenticateUser, login
 }
 

@@ -4,14 +4,6 @@ const UnitTestFramework = require('../unit.test.framework')
 const {db, pool, truncateAll} = require('../../database').init()
 const {seedTables} = require('../../seeders')
 
-const output = [
-    {
-        id: 1, 
-        name: 'Admin',
-        description: "Full access to system features."
-    }
-]
-
 const testCases = {
     create: [
         {
@@ -41,19 +33,19 @@ const testCases = {
     read: [
         {
             input: {params:{id: 1}},
-            output: {httpCode: 200, data: output},
+            output: {httpCode: 200, data: [{id: 1, name: 'Admin', description: "Full access to system features." }]},
             description: 'input params.id should run model.findByPk and returning array'
         },{
             input: {query:{id: [1, 2]}},
-            output: {httpCode: 200, data: output},
+            output: {httpCode: 200, data: [{id: 1, name: 'Admin', description: "Full access to system features." }]},
             description: 'input query.id should run model.findByKeys and returning array'
         },{
             input: {body: {id: 1, name: 'Admin'}},
-            output: {httpCode: 200, data: output},
+            output: {httpCode: 200, data: [{id: 1, name: 'Admin', description: "Full access to system features." }]},
             description: 'input body.id should run model.findByKeys and returning array'
         },{
             input: {body: {}},
-            output: {httpCode: 200, data: output},
+            output: {httpCode: 200, data: [{id: 1, name: 'Admin', description: "Full access to system features." }]},
             description: 'input empty body should run model.findAll and returning array'
         },{
             input: {body: {id: 99999}},

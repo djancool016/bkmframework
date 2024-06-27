@@ -1,9 +1,8 @@
 const UserModel = require('../models/user.model')
 const TokenManager = require("../utils/tokenManager")
-const mysqlErrHandler = require('../utils/MysqlErrorCode')
-const logging = require('../config').logging
-const CustomError = require('../utils/CustomError')
-const {dataLogger} = require('../utils/HttpLogger')
+const {errorCode, errorHandler} = require('../utils/CustomError')
+const {dataLogger, statusLogger} = require('../utils/HttpLogger')
+const PasswordManager = require('../utils/passwordManager')
 const tokenSecret = {
     accessToken: process.env.ACCESS_TOKEN_SECRET,
     refreshToken: process.env.REFRESH_TOKEN_SECRET
@@ -32,19 +31,17 @@ async function rotateToken(req, res, next, cookies = setCookies, secret = tokenS
         return next()
 
     } catch (error) {
-        if(logging) console.error(error)
         if(error.message == 'jwt malformed'){
             error['code'] = 'ER_JWT_MALFORMED'
         }
-        req.result = mysqlErrHandler(error)
+        req.result = errorHandler(error)
         return next()
     }
 }
 /**
  * function for authorize user using JWT Token
  */
-async function authorizeUser(req, res, next, cookies = setCookies, secret = tokenSecret
-){
+async function authorizeUser(req, res, next, cookies = setCookies, secret = tokenSecret){
     try {
         // check if token exist
         const{refreshToken, accessToken} = isTokenExist(req)
@@ -61,7 +58,7 @@ async function authorizeUser(req, res, next, cookies = setCookies, secret = toke
             user = await getUserData(payload)
         }
 
-        if(!user.data) throw new CustomError('ER_NOT_FOUND')
+        if(!user.data) throw errorCode.ER_JWT_PAYLOAD_INVALID
         
         // add user data into request payload
         const {password, ...rest} = user.data[0]
@@ -73,8 +70,7 @@ async function authorizeUser(req, res, next, cookies = setCookies, secret = toke
         // returning validated payload data
 
     } catch (error) {
-        if(logging) console.error(error)
-        req.result = mysqlErrHandler(error)
+        req.result = errorHandler(error)
         return next()
     }
 }
@@ -84,6 +80,46 @@ async function authorizeUser(req, res, next, cookies = setCookies, secret = toke
  */
 async function login(){
 
+}
+/**
+ * Function to authenticate user using username and password
+ */
+async function authenticateUser(req, res, next, cookies = setCookies, secret = tokenSecret) {
+    try {
+        const { username, password } = req.body;
+
+        // Validate username and password
+        if (!username || !password) {
+            throw errorCode.ER_INVALID_CREDENTIALS
+        }
+        const model = new UserModel()
+        // Fetch user data from database
+        const user = await model.findByKeys({username}, false)
+        if (!user.data[0]) throw errorCode.ER_NOT_FOUND
+
+        const {password: hash, ...data} = user.data[0]
+
+        if(!hash) throw errorCode.ER_EMPTY_HASHED_PASSWORD
+
+        // Verify password
+        const isPasswordValid = await PasswordManager.compare({password, hashedPassword: hash})
+        if (!isPasswordValid) throw errorCode.ER_INVALID_PASSWORD
+
+        // Generate tokens
+        const payload = { id: data.id, username: data.username }
+        const tokens = await TokenManager.authenticatedUser(payload, secret.refreshToken)
+
+        // Set cookies
+        cookies(res, tokens);
+
+        req.result = dataLogger({ data })
+
+        // Run next middleware
+        return next()
+    } catch (error) {
+        req.result = errorHandler(error)
+        return next()
+    }
 }
 /**
  * Function for deauthenticate user by revoke token from client side cookies
@@ -116,9 +152,16 @@ function setCookies(res, tokens) {
 
 function isTokenExist(req){
     const refreshToken = req?.cookies?.refreshToken
-    const accessToken = req?.cookies?.refreshToken
+    const accessToken = req?.cookies?.accessToken
+
+    const isJwtToken = (token) => {
+        const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/
+        return jwtRegex.test(token)
+    }
     if(!refreshToken || !accessToken){
-        throw new CustomError('ER_JWT_NOT_FOUND')
+        throw errorCode.ER_JWT_NOT_FOUND
+    }else if(!isJwtToken(refreshToken) || !isJwtToken(accessToken)){
+        throw errorCode.ER_JWT_MALFORMED
     }else{
         return {refreshToken, accessToken}
     }
@@ -128,7 +171,7 @@ async function handleTokenRotation(payload, secret){
     if (tokens && tokens.refreshToken && tokens.accessToken) {
         return tokens
     } else {
-        throw new CustomError('ER_INVALID_TOKEN')
+        throw errorCode.ER_JWT_INVALID
     }
 }
 async function validateToken(token, secret){
@@ -141,9 +184,9 @@ async function getUserData(payload) {
     const model = new UserModel()
     const user = await model.findByPk(payload.id)
     if (user) return user
-    throw new CustomError('ER_JWT_PAYLOAD_INVALID')
+    throw errorCode.ER_JWT_PAYLOAD_INVALID
 }
 module.exports = {
-    rotateToken, authorizeUser
+    rotateToken, authorizeUser, authenticateUser
 }
 

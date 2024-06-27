@@ -102,6 +102,9 @@ const errorCode = {
     'ER_INVALID_PASSWORD': { 
         httpCode: 400, type: 'Input_Error', code: 'ER_INVALID_PASSWORD', message: 'Invalid Password' 
     },
+    'ER_INVALID_CREDENTIALS': { 
+        httpCode: 400, type: 'Input_Error', code: 'ER_INVALID_CREDENTIALS', message: 'Invalid Username or Password' 
+    },
     'ER_INVALID_PASSWORD_FORMAT': { 
         httpCode: 400, type: 'Input_Error', code: 'ER_INVALID_PASSWORD_FORMAT', message: 'Invalid Password Format' 
     },
@@ -147,7 +150,9 @@ const errorCode = {
     'ER_QUERY_ERROR': {
         httpCode: 500, type: 'Model_Error', code: 'ER_QUERY_PARAM', message: 'Query id not defined' 
     },
-
+    'ER_AUTHENTICATION_FAILED': {
+        httpCode: 401, type: 'Authentication_Error', code: 'ER_AUTHENTICATION_FAILED', message: 'Authentication failed'
+    },
     // unknown error
     'INTERNAL_SERVER_ERROR': { 
         httpCode: 500, type: 'Unknown_Error', code: 'INTERNAL_SERVER_ERROR', message: 'Internal server error' 

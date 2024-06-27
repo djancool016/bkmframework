@@ -5,7 +5,7 @@ module.exports = {
             id: 1,
             roleId: 1,
             username: 'admin',
-            password: '$2b$10$6mDs.1WWdji41IYYRi9KGeL7yI69dV3OsL62HF46sb6TJ2XLyZX/K',
+            password: '$2b$10$h6Uo0u07tzgVf14jTsIPHOskqDUdDwLsZeMFCxX5rm8BsEJTePZd.',
             email: 'admin@Email.com',
             name: 'Dwi Julianto',
             phone: '213546879213',

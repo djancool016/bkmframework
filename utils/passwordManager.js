@@ -54,7 +54,7 @@ class PasswordManager {
             // check if password is string
             if(typeof password !== 'string') throw errorCode.ER_INVALID_PASSWORD_FORMAT
             // check hashed password
-            if(typeof hashedPassword !== 'string' || !hashedPassword) throw errorCode.ER_COMPARE_PASSWORD
+            if(typeof hashedPassword !== 'string' || !hashedPassword) throw errorCode.ER_INVALID_HASH_FORMAT
 
             // compare password
             const result = await bcrypt.compare(password, hashedPassword)

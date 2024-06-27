@@ -23,12 +23,10 @@ class BaseModel {
         if(!requestBody) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('readAll', requestBody)
     }
-
     async findByKeys(requestBody, patternMatching = true) {
         if(!requestBody || hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('readByKeys', requestBody, [patternMatching])
     }
-
     async update(requestBody) {
         if(!requestBody || hasEmptyValue(requestBody)) throw errorCode.ER_INVALID_BODY
         return this.#runSqlQuery('update', requestBody)

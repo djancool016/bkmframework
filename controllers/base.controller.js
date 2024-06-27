@@ -1,7 +1,5 @@
 const {statusLogger, dataLogger} = require('../utils/HttpLogger')
 const {errorCode, errorHandler} = require('../utils/CustomError')
-const CustomError = require('../utils/CustomError')
-const logging = require('../config').logging
 
 async function create(req, res, next, model){
     try {
@@ -18,7 +16,6 @@ async function create(req, res, next, model){
         return next()
         
     } catch (error) {
-        if(logging) console.error(error)
         req.result = errorHandler(error)
         return next()
     }
@@ -52,7 +49,6 @@ async function read(req, res, next, model){
         return next()
 
     } catch (error) {
-        if(logging) console.error(error)
         req.result = errorHandler(error)
         return next()
     }
@@ -71,7 +67,6 @@ async function update(req, res, next, model){
         return next()
 
     } catch (error) {
-        if(logging) console.error(error)
         req.result = errorHandler(error)
         return next()
     }
@@ -108,7 +103,6 @@ async function destroy(req, res, next, model){
         if(error.code == 'ER_ROW_IS_REFERENCED_2'){
             error.message = 'Id is used as foreign key'
         }
-        if(logging) console.error(error)
         req.result = errorHandler(error)
         return next()
     }

@@ -17,7 +17,8 @@ module.exports = {
         {
             columnName: "username",
             dataType: "VARCHAR(100)",
-            nullable: false
+            nullable: false,
+            unique: true
         },
         {
             columnName: "email",

@@ -143,20 +143,89 @@ async function authenticateUser(req, res, next, cookies = setCookies, secret = t
 /**
  * Function for deauthenticate user by revoke token from client side cookies
  */
-async function logout(){
+async function logout(req, res, next) {
+    try {
+        // Clear cookies
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict'
+        });
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict'
+        });
 
+        req.result = statusLogger({httpCode: 200, message: 'Logout successful'})
+
+        // Run next middleware
+        return next()
+    } catch (error) {
+        req.result = errorHandler(error)
+        return next()
+    }
 }
 /**
  * Function for create new user
  */
-async function register(){
+async function register(req, res, next, cookie = setCookies, secret = tokenSecret) {
+    try {
+        if (!req.body || !req.body.password) throw errorCode.ER_INVALID_BODY
+        const { password, ...userData } = req.body
 
+        const model = new UserModel()
+
+        // Hash password
+        const hashedPassword = await PasswordManager.encrypt({password})
+
+        // Create new user
+        const newUser = await model.create({ password: hashedPassword , ...userData})
+        const user = await model.findByPk(newUser.data.insertId)
+
+        if(!user.data[0]) throw errorCode.ER_NOT_FOUND
+
+        const{id, username, ...rest} = user.data[0]
+
+        // Generate tokens
+        const payload = { id, username }
+        const tokens = await TokenManager.authenticatedUser(payload, secret.refreshToken)
+
+        // Set cookies
+        cookie(res, tokens)
+
+        req.result = statusLogger({httpCode: 201})
+
+        // Run next middleware
+        return next()
+    } catch (error) {
+        req.result = errorHandler(error)
+        return next()
+    }
 }
 /**
  * Function for retrieve user information
  */
-async function profile(){
+async function profile(req, res, next, cookie = setCookies, secret = tokenSecret) {
+    try {
+        const { refreshToken } = isTokenExist(req)
+        
+        const payload = await validateToken(refreshToken, secret.refreshToken)
+        const user = await getUserData(payload)
 
+        const {password, ...rest} = user.data[0]
+
+        if (rest) {
+            req.result = dataLogger({ httpCode: 200, data: rest })
+        } else {
+            throw errorCode.ER_NOT_FOUND
+        }
+
+        return next()
+    } catch (error) {
+        req.result = errorHandler(error)
+        return next()
+    }
 }
 
 function setCookies(res, tokens) {
@@ -206,6 +275,6 @@ async function getUserData(payload) {
     throw errorCode.ER_JWT_PAYLOAD_INVALID
 }
 module.exports = {
-    rotateToken, authorizeUser, authenticateUser, login
+    rotateToken, authorizeUser, authenticateUser, login, register, logout, profile
 }
 

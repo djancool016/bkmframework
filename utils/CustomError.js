@@ -32,6 +32,9 @@ const errorCode = {
     'ER_BAD_FIELD_ERROR': { 
         httpCode: 400, type: 'DB_Error', code: 'ER_BAD_FIELD_ERROR', message: 'Invalid field key' 
     },
+    'ER_CREATE_FAILED': { 
+        httpCode: 500, type: 'DB_Error', code: 'ER_CREATE_FAILED', message: 'Failed to create resource' 
+    },
     'ER_ROW_IS_REFERENCED_2': { 
         httpCode: 400, type: 'DB_Error', code: 'ER_ROW_IS_REFERENCED_2', message: 'Row is referenced' 
     },
